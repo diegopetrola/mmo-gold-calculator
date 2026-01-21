@@ -1,16 +1,48 @@
-# React + Vite
+# MMO Coin Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple React web app to help RPG players calculate currency operations.
+It can be accessed at [mmo-gold-calc](https://diegopetrola.github.io/mmo-gold-calculator/)
 
-Currently, two official plugins are available:
+## How it works
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Many MMOs use a tiered currency system. This calculator assumes the standard conversion rate:
 
-## React Compiler
+- **1 Gold** = 100 Silver
+- **1 Silver** = 100 Bronze
+- (1 Gold = 10,000 Bronze)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The app converts all inputs to the base unit (Bronze), performs the operation, and formats the result back into Gold/Silver/Bronze
+(Later I might add an option to change this ratios).
 
-## Expanding the ESLint configuration
+The `Use Result` button allows to use the current result as the starting amount of a new calculation.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Features
+
+- **Addition/Subtraction:** Add or subtract two specific currency amounts (e.g., Price A + Price B).
+- **Multiplication:** Multiply a currency amount by a factor (e.g., "I sold 50 of these items").
+- **Percentage:** Calculate cuts or taxes (e.g., "Calculate a 5% auction house fee").
+
+## Built With
+
+- [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- [React Bootstrap](https://react-bootstrap.netlify.app/)
+- [gh-pages](https://www.npmjs.com/package/gh-pages/)
+
+## Running Locally
+
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/diegopetrola/mmo-gold-calculator
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the local server:
+    ```bash
+    npm run dev
+    ```
+4.  Deployment:
+    ```bash
+    npm run deploy
+    ```

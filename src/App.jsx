@@ -118,7 +118,7 @@ function App() {
 
   return (
     <div className="container py-4">
-      <h1 className="mb-4 text-center">💰 MMO Coin Calculator</h1>
+      <h1 className="mb-4 text-center">💰 RPG Coin Calculator</h1>
 
       <Card className="shadow-sm">
         <Card.Header as="h4">Calculator</Card.Header>
@@ -138,7 +138,7 @@ function App() {
               <DropdownButton
                 variant="outline-primary"
                 title={operation}
-                onSelect={(k) => setOperation(k)}
+                onSelect={(o) => setOperation(o)}
               >
                 <Dropdown.Item eventKey="+">+</Dropdown.Item>
                 <Dropdown.Item eventKey="-">-</Dropdown.Item>
@@ -178,15 +178,34 @@ function App() {
               </>
             )}
           </Row>
-
           <hr />
-
-          <Row className="align-items-center">
+          <Row className="align-items-center mb-2">
             <Col sm={3}>
               <h5>Result</h5>
             </Col>
             <Col sm={9}>
               <CoinWallet wallet={resultWallet} disabled={true} />
+            </Col>
+          </Row>
+
+          <Row className="align-items-center">
+            <Col sm={3}> </Col>
+            <Col className="text-center">
+              <OverlayTrigger
+                trigger={["hover", "focus"]}
+                placement="top"
+                overlay={<Tooltip>Use Result as the new start amount.</Tooltip>}
+              >
+                <Button variant="link" className="p-0 me-2 border-0">
+                  <Image src={`./imgs/help.svg`} height="30px" alt="help" />
+                </Button>
+              </OverlayTrigger>
+              <Button
+                className="p-2 px-4"
+                onClick={() => setInputWallet({ ...resultWallet })}
+              >
+                Use Result
+              </Button>
             </Col>
           </Row>
         </Card.Body>
