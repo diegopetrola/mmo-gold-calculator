@@ -1,9 +1,8 @@
-import { useState, useEffect, useEffectEvent } from "react";
+import { useState } from "react";
 import {
   OverlayTrigger,
   Tooltip,
   Button,
-  CardBody,
   Card,
   Row,
   Col,
@@ -14,210 +13,183 @@ import {
 } from "react-bootstrap";
 import "./App.css";
 
-function App() {
-  const [gold, setGold] = useState(0);
-  const [silver, setSilver] = useState(0);
-  const [bronze, setBronze] = useState(0);
-  const [result, setResult] = useState({ g: 0, s: 0, b: 0 });
-  const [operation, setOperation] = useState("+");
-  //Operand is used in sum and minus
-  //factor is used in mult and percent
-  const [operandGold, setOperandGold] = useState(0);
-  const [operandSilver, setOperandSilver] = useState(0);
-  const [operandBronze, setOperandBronze] = useState(0);
-  const [factor, setFactor] = useState(1);
+const COIN_TYPES = ["gold", "silver", "bronze"];
 
-  const validOperations = ["+", "-", "×", "%"];
-
-  const toTotalBronze = (g, s, b) => {
-    return Number(g) * 10000 + Number(s) * 100 + Number(b);
-  };
-
-  const fromTotalBronze = useEffectEvent((total) => {
-    const g = Math.floor(total / 10000);
-    const remainder = total % 10000;
-    const s = Math.floor(remainder / 100);
-    const b = remainder % 100;
-    setResult({ g, s, b });
-  });
-
-  useEffect(() => {
-    const totalInputBronze = toTotalBronze(gold, silver, bronze);
-    const totalOperandBronze = toTotalBronze(
-      operandGold,
-      operandSilver,
-      operandBronze,
-    );
-    let calculatedTotal = 0;
-    switch (operation) {
-      case "+":
-        calculatedTotal = totalInputBronze + totalOperandBronze;
-        break;
-      case "-":
-        calculatedTotal = totalInputBronze - totalOperandBronze;
-        break;
-      case "×":
-        calculatedTotal = totalInputBronze * factor;
-        break;
-      default:
-        calculatedTotal = (totalInputBronze * factor) / 100;
-        break;
-    }
-    fromTotalBronze(calculatedTotal);
-  }, [
-    gold,
-    silver,
-    bronze,
-    operandGold,
-    operandSilver,
-    operandBronze,
-    factor,
-    operation,
-  ]);
-
-  const goldTooltip = (name) => (
-    <Tooltip id={`tooltip-top-${name}`}>{name} coins</Tooltip>
+const toTotalBronze = (wallet) => {
+  return (
+    Number(wallet.gold || 0) * 10000 +
+    Number(wallet.silver || 0) * 100 +
+    Number(wallet.bronze || 0)
   );
+};
 
-  const getCoinElementDisabled = (name) => {
-    return (
-      <Col className="d-flex align-items-center">
-        <OverlayTrigger
-          className="m-2"
-          trigger="click"
-          placement="top"
-          overlay={goldTooltip(name)}
-        >
-          <Button className="border-0 bg-transparent">
-            <Image
-              src={`./imgs/${name}.webp`}
-              height={"30px"}
-              className="d-block"
-            />
-          </Button>
-        </OverlayTrigger>
+const fromTotalBronze = (total) => {
+  const t = Math.floor(total);
+  const g = Math.floor(t / 10000);
+  const remainder = t % 10000;
+  const s = Math.floor(remainder / 100);
+  const b = remainder % 100;
+  return { gold: g, silver: s, bronze: b };
+};
 
-        <Form.Group controlId={`${name}-form-disabled`}>
-          <Form.Control
-            disabled
-            readOnly
-            className="text-center"
-            type="number"
-            placeholder="0"
-            value={result[name[0]]}
-          />
-        </Form.Group>
-      </Col>
-    );
-  };
+const CoinInput = ({ type, value, onChange, disabled }) => (
+  <Col className="d-flex align-items-center mb-2">
+    <OverlayTrigger
+      trigger={["hover", "focus"]}
+      placement="top"
+      overlay={<Tooltip className="text-capitalize">{type} Coins</Tooltip>}
+    >
+      <Button variant="link" className="p-0 me-2 border-0">
+        <Image src={`./imgs/${type}.webp`} height="30px" alt={type} />
+      </Button>
+    </OverlayTrigger>
 
-  const getCoinElement = (name, value, onChange, isOperand = false) => {
-    return (
-      <Col className="d-flex align-items-center">
-        <OverlayTrigger
-          className="m-2"
-          trigger="click"
-          placement="top"
-          overlay={goldTooltip(name)}
-        >
-          <Button className="border-0 bg-transparent">
-            <Image
-              src={`./imgs/${name}.webp`}
-              height={"30px"}
-              className="d-block"
-            />
-          </Button>
-        </OverlayTrigger>
+    <Form.Control
+      type="number"
+      className="text-center"
+      placeholder="0"
+      value={value === 0 ? "" : value}
+      onChange={(e) => onChange && onChange(e.target.value)}
+      disabled={disabled}
+      readOnly={disabled}
+    />
+  </Col>
+);
 
-        <Form.Group controlId={`${name}-form${isOperand ? "-operand" : ""}`}>
-          <Form.Control
-            className="text-center"
-            type="number"
-            value={value}
-            onChange={(e) => onChange(e.target.value || 0)}
-          />
-        </Form.Group>
-      </Col>
-    );
+const CoinWallet = ({ wallet, setWallet, disabled = false }) => {
+  const handleChange = (type, val) => {
+    setWallet({ ...wallet, [type]: Number(val) });
   };
 
   return (
-    <div className="container">
-      <h1 className="mb-4">💰 MMO Coin Calculator</h1>
-      <Card className="d-flex m-2">
-        <Card.Title as={"h2"}>Input</Card.Title>
-        <CardBody>
-          <Row>
-            {getCoinElement("gold", gold, setGold)}
-            {getCoinElement("silver", silver, setSilver)}
-            {getCoinElement("bronze", bronze, setBronze)}
-          </Row>
-          <Row className="mt-4">
-            <Col className="text-end">
-              <h2>Operation: </h2>
+    <Row>
+      {COIN_TYPES.map((type) => (
+        <CoinInput
+          key={type}
+          type={type}
+          value={wallet[type]}
+          onChange={(val) => handleChange(type, val)}
+          disabled={disabled}
+        />
+      ))}
+    </Row>
+  );
+};
+
+function App() {
+  const [inputWallet, setInputWallet] = useState({
+    gold: 0,
+    silver: 0,
+    bronze: 0,
+  });
+  const [operandWallet, setOperandWallet] = useState({
+    gold: 0,
+    silver: 0,
+    bronze: 0,
+  });
+
+  const [operation, setOperation] = useState("+");
+  const [factor, setFactor] = useState(1);
+  const valA = toTotalBronze(inputWallet);
+  const valB = toTotalBronze(operandWallet);
+
+  let resultBronze = 0;
+
+  switch (operation) {
+    case "+":
+      resultBronze = valA + valB;
+      break;
+    case "-":
+      resultBronze = Math.max(0, valA - valB);
+      break;
+    case "×":
+      resultBronze = valA * factor;
+      break;
+    case "%":
+      resultBronze = (valA * factor) / 100;
+      break;
+    default:
+      resultBronze = valA;
+  }
+
+  const resultWallet = fromTotalBronze(resultBronze);
+
+  const isScalar = operation === "×" || operation === "%";
+
+  return (
+    <div className="container py-4">
+      <h1 className="mb-4 text-center">💰 MMO Coin Calculator</h1>
+
+      <Card className="shadow-sm">
+        <Card.Header as="h4">Calculator</Card.Header>
+        <Card.Body>
+          <Row className="align-items-center mb-3">
+            <Col sm={3}>
+              <h5>Start Amount</h5>
             </Col>
-            <Col>
+            <Col sm={9}>
+              <CoinWallet wallet={inputWallet} setWallet={setInputWallet} />
+            </Col>
+          </Row>
+
+          <Row className="align-items-center mb-3">
+            <Col sm={3}></Col>
+            <Col sm={9} className="text-center">
               <DropdownButton
-                size="lg"
-                className="mx-3"
-                as={"div"}
+                variant="outline-primary"
                 title={operation}
-                id="operation-dropdown"
+                onSelect={(k) => setOperation(k)}
               >
-                {validOperations.map((op) => (
-                  <Dropdown.Item
-                    key={`dropdown-${op}`}
-                    id={`dropdown-${op}`}
-                    eventKey={`dropdown-${op}`}
-                    onClick={(e) => setOperation(e.target.innerText)}
-                  >
-                    {op}
-                  </Dropdown.Item>
-                ))}
+                <Dropdown.Item eventKey="+">+</Dropdown.Item>
+                <Dropdown.Item eventKey="-">-</Dropdown.Item>
+                <Dropdown.Item eventKey="×">×</Dropdown.Item>
+                <Dropdown.Item eventKey="%">%</Dropdown.Item>
               </DropdownButton>
             </Col>
-            <Col></Col>
           </Row>
-          <Row className="my-4">
-            {(operation == "+" || operation == "-") && (
+          <Row className="d-flex align-items-center mb-3">
+            {!isScalar ? (
               <>
-                {getCoinElement("gold", operandGold, setOperandGold, true)}
-                {getCoinElement(
-                  "silver",
-                  operandSilver,
-                  setOperandSilver,
-                  true,
-                )}
-                {getCoinElement(
-                  "bronze",
-                  operandBronze,
-                  setOperandBronze,
-                  true,
-                )}
-              </>
-            )}
-            {(operation == "×" || operation == "%") && (
-              <Col className="mx-5">
-                <Form.Group controlId={`$factor-form-${operation}`}>
-                  <Form.Control
-                    className="text-center"
-                    type="number"
-                    placeholder="0"
-                    defaultValue={factor}
-                    onChange={(e) => setFactor(e.target.value || 0)}
+                <Col sm={3}></Col>
+                <Col sm={9}>
+                  <CoinWallet
+                    wallet={operandWallet}
+                    setWallet={setOperandWallet}
                   />
-                </Form.Group>
-              </Col>
+                </Col>
+              </>
+            ) : (
+              <>
+                <Col sm={3}>
+                  <h5> {operation === "%" ? "Percentage" : "Multiplier"}</h5>
+                </Col>
+                <Col sm={2}></Col>
+                <Col sm={5}>
+                  <Form.Group className="d-flex align-items-center">
+                    <Form.Control
+                      id={`${operation}-form`}
+                      className="text-center"
+                      type="number"
+                      value={factor}
+                      onChange={(e) => setFactor(Number(e.target.value))}
+                    />
+                  </Form.Group>
+                </Col>
+              </>
             )}
           </Row>
 
           <hr />
-          <Row>
-            {getCoinElementDisabled("gold")}
-            {getCoinElementDisabled("silver")}
-            {getCoinElementDisabled("bronze")}
+
+          <Row className="align-items-center">
+            <Col sm={3}>
+              <h5>Result</h5>
+            </Col>
+            <Col sm={9}>
+              <CoinWallet wallet={resultWallet} disabled={true} />
+            </Col>
           </Row>
-        </CardBody>
+        </Card.Body>
       </Card>
     </div>
   );
